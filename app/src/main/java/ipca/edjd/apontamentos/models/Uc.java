@@ -1,9 +1,13 @@
 package ipca.edjd.apontamentos.models;
 
+import io.realm.Realm;
 import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.annotations.PrimaryKey;
 
-class Uc extends RealmObject {
+public class Uc extends RealmObject {
 
+    @PrimaryKey
     long   id;
     String nome;
     String docente;
@@ -43,6 +47,53 @@ class Uc extends RealmObject {
         this.nome    = nome;
         this.docente = docente;
     }
+
+    public static void add(final Uc uc, Realm realm){
+        RealmResults<Uc> ucs = realm.where(Uc.class)
+                .equalTo("nome", uc.nome)
+                .findAll();
+        if (ucs.size()==0){
+            realm.executeTransaction(new Realm.Transaction(){
+                @Override
+                public void execute(Realm realm) {
+                    Uc item = realm.createObject(Uc.class,System.currentTimeMillis());
+                    item.docente = uc.docente;
+                    item.nome = uc.nome;
+                }
+            });
+        }
+    }
+
+    public static void update(final Uc uc, Realm realm){
+        final RealmResults<Uc> ucs = realm.where(Uc.class)
+                .equalTo("id", uc.id)
+                .findAll();
+        if (ucs.size()>0){
+            realm.executeTransaction(new Realm.Transaction(){
+                @Override
+                public void execute(Realm realm) {
+                    ucs.first().docente = uc.docente;
+                    ucs.first().nome = uc.nome;
+                }
+            });
+        }
+    }
+
+    public static void delete(final Uc uc, Realm realm){
+        final RealmResults<Uc> ucs = realm.where(Uc.class)
+                .equalTo("id", uc.id)
+                .findAll();
+        if (ucs.size()>0){
+            realm.executeTransaction(new Realm.Transaction(){
+                @Override
+                public void execute(Realm realm) {
+                    ucs.first().deleteFromRealm();
+                }
+            });
+        }
+    }
+
+
 
 
 }
