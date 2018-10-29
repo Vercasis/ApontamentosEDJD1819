@@ -3,11 +3,9 @@ package ipca.edjd.apontamentos.models;
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
-import io.realm.annotations.PrimaryKey;
 
 public class Uc extends RealmObject {
 
-    @PrimaryKey
     long   id;
     String nome;
     String docente;

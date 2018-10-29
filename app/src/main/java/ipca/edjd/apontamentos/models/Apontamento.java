@@ -1,27 +1,26 @@
 package ipca.edjd.apontamentos.models;
 
 import java.util.Date;
+import java.util.UUID;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
-import io.realm.annotations.PrimaryKey;
 
 public class Apontamento extends RealmObject {
 
-    @PrimaryKey
-    long    id;
+    String  id;
     String  titulo;
     String  descricao;
     Date    date;
     String  uriPhoto;
     Uc      uc;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -66,7 +65,7 @@ public class Apontamento extends RealmObject {
     }
 
     public Apontamento() {
-        this.id          = 0;
+        this.id          = UUID.randomUUID().toString();
         this.titulo      = "";
         this.descricao   = "";
         this.date        = new Date();
@@ -74,7 +73,7 @@ public class Apontamento extends RealmObject {
         this.uc          = new Uc();
     }
 
-    public Apontamento(long id, String titulo, String descricao, Date date, String uriPhoto, Uc uc) {
+    public Apontamento(String id, String titulo, String descricao, Date date, String uriPhoto, Uc uc) {
         this.id         = id;
         this.titulo     = titulo;
         this.descricao  = descricao;
@@ -91,12 +90,13 @@ public class Apontamento extends RealmObject {
             realm.executeTransaction(new Realm.Transaction(){
                 @Override
                 public void execute(Realm realm) {
-                    Apontamento item = realm.createObject(Apontamento.class,System.currentTimeMillis());
+                    Apontamento item = realm.createObject(Apontamento.class);
+                    item.id = apontamento.id;
                     item.titulo     =   apontamento.titulo    ;
                     item.descricao  =   apontamento.descricao ;
-                    item.date       =   apontamento.date      ;
-                    item.uriPhoto   =   apontamento.uriPhoto  ;
-                    item.uc         =   apontamento.uc        ;
+                    //item.date       =   apontamento.date      ;
+                    //item.uriPhoto   =   apontamento.uriPhoto  ;
+                    //item.uc         =   apontamento.uc        ;
                 }
             });
         }
