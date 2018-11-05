@@ -1,6 +1,7 @@
 package ipca.edjd.apontamentos;
 
 import android.content.Intent;
+import android.os.BaseBundle;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,6 +11,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -17,6 +23,10 @@ import io.realm.RealmResults;
 import ipca.edjd.apontamentos.models.Apontamento;
 
 public class MainActivity extends AppCompatActivity {
+
+    ListView listView;
+    RealmResults<Apontamento> apontamentos;
+    ApontamentosAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         Realm realm = Realm.getDefaultInstance();
 
-        final RealmResults<Apontamento> apontamentos = realm.where(Apontamento.class)
+        apontamentos = realm.where(Apontamento.class)
                 .findAll();
 
         for (Apontamento a : apontamentos) {
@@ -37,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
+
+        listView = findViewById(R.id.listViewApontamentos);
+        adapter = new ApontamentosAdapter();
+        listView.setAdapter(adapter);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -44,9 +59,6 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                //        .setAction("Action", null).show();
-
                 Intent intent = new Intent(MainActivity.this, AddActivity.class);
                 startActivity(intent);
             }
@@ -74,4 +86,38 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    class ApontamentosAdapter extends BaseAdapter {
+
+        @Override
+        public int getCount() {
+            return apontamentos.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return apontamentos.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView==null)
+                convertView = getLayoutInflater().inflate(R.layout.rowview_apontamento,null);
+
+            TextView textViewDescription = convertView.findViewById(R.id.textViewDescription);
+            TextView textViewUCName = convertView.findViewById(R.id.textViewNomeUC);
+            ImageView imageView = convertView.findViewById(R.id.imageViewApontamento);
+
+            textViewDescription.setText(apontamentos.get(position).getTitulo());
+            textViewUCName.setText(apontamentos.get(position).getUc().getNome());
+
+            return convertView;
+        }
+    }
+
 }
