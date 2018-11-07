@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import ipca.edjd.apontamentos.models.Apontamento;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String TAG = "apontamentos";
     ListView listView;
     RealmResults<Apontamento> apontamentos;
     ApontamentosAdapter adapter;
@@ -78,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                     != PackageManager.PERMISSION_GRANTED) {
                 requestPermission();
             } else {
-                Log.i("apontamentos","External storage permission has already been granted.");
+                Log.i(TAG,"External storage permission has already been granted.");
             }
         }
 
@@ -134,6 +136,12 @@ public class MainActivity extends AppCompatActivity {
 
             textViewDescription.setText(apontamentos.get(position).getTitulo());
             textViewUCName.setText(apontamentos.get(position).getUc().getNome());
+
+            String path = apontamentos.get(position).getUriPhoto();
+            if (path != null){
+                Bitmap bm = Utils.loadBitmap(path);
+                imageView.setImageBitmap(bm);
+            }
 
             return convertView;
         }

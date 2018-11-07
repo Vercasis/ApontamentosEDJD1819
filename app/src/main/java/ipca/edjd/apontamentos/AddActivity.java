@@ -46,10 +46,23 @@ public class AddActivity extends AppCompatActivity {
 
             Apontamento apontamento = new Apontamento();
             apontamento.setDate(new Date());
+
+            if (bm!=null){
+                String path =Utils.saveBitmap(bm);
+                if (path !=null) {
+                    apontamento.setUriPhoto(path);
+                }
+            }
+
             apontamento.setTitulo(editTextTitle.getText().toString());
             apontamento.setDescricao(editTextDiscription.getText().toString());
 
+
             Apontamento.add(apontamento, Realm.getDefaultInstance());
+
+
+
+            finish();
 
             return true;
         }
@@ -63,12 +76,14 @@ public class AddActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    Bitmap bm;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode  == RESULT_OK){
             if (requestCode == CAMERA_PIC_REQUEST){
-                Bitmap bm = (Bitmap) data.getExtras().get("data");
+                bm = (Bitmap) data.getExtras().get("data");
                 imageViewPhoto.setImageBitmap(bm);
             }
         }
