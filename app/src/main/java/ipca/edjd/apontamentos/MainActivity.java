@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     RealmResults<Apontamento> apontamentos;
     ApontamentosAdapter adapter;
+    Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,14 +48,12 @@ public class MainActivity extends AppCompatActivity {
                 .deleteRealmIfMigrationNeeded()
                 .build();
 
-        Realm realm = Realm.getDefaultInstance();
+        realm = Realm.getDefaultInstance();
 
         apontamentos = realm.where(Apontamento.class)
                 .findAll();
 
-        for (Apontamento a : apontamentos) {
-            Log.d("apontamentos_AA", a.getTitulo());
-        }
+
 
         setContentView(R.layout.activity_main);
 
@@ -84,6 +83,21 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
+        apontamentos = realm.where(Apontamento.class)
+                .findAll();
+
+        for (Apontamento a : apontamentos) {
+            Log.d("apontamentos_AA", a.getTitulo());
+        }
+
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -183,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_WRITE_EXSD) {
             if(ActivityCompat.
                     checkSelfPermission(this, permissions[0]) == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(MainActivity.this, "Premission Granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Permission Granted", Toast.LENGTH_SHORT).show();
 
 
             } else {

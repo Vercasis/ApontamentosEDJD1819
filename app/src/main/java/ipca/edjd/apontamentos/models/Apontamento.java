@@ -94,8 +94,8 @@ public class Apontamento extends RealmObject {
                     item.id = apontamento.id;
                     item.titulo     =   apontamento.titulo    ;
                     item.descricao  =   apontamento.descricao ;
-                    //item.date       =   apontamento.date      ;
-                    //item.uriPhoto   =   apontamento.uriPhoto  ;
+                    item.date       =   apontamento.date      ;
+                    item.uriPhoto   =   apontamento.uriPhoto  ;
                     //item.uc         =   apontamento.uc        ;
                 }
             });
