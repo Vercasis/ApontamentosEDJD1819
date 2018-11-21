@@ -3,11 +3,8 @@ package ipca.edjd.apontamentos.models;
 import java.util.Date;
 import java.util.UUID;
 
-import io.realm.Realm;
-import io.realm.RealmObject;
-import io.realm.RealmResults;
 
-public class Apontamento extends RealmObject {
+public class Apontamento  {
 
     String  id;
     String  titulo;
@@ -82,55 +79,5 @@ public class Apontamento extends RealmObject {
         this.uc         = uc;
     }
 
-    public static void add(final Apontamento apontamento, Realm realm){
-        RealmResults<Apontamento> apontamentos = realm.where(Apontamento.class)
-                .equalTo("id", apontamento.id)
-                .findAll();
-        if (apontamentos.size()==0){
-            realm.executeTransaction(new Realm.Transaction(){
-                @Override
-                public void execute(Realm realm) {
-                    Apontamento item = realm.createObject(Apontamento.class);
-                    item.id = apontamento.id;
-                    item.titulo     =   apontamento.titulo    ;
-                    item.descricao  =   apontamento.descricao ;
-                    item.date       =   apontamento.date      ;
-                    item.uriPhoto   =   apontamento.uriPhoto  ;
-                    //item.uc         =   apontamento.uc        ;
-                }
-            });
-        }
-    }
 
-    public static void update(final Apontamento apontamento, Realm realm){
-        final RealmResults<Apontamento> apontamentos = realm.where(Apontamento.class)
-                .equalTo("id", apontamento.id)
-                .findAll();
-        if (apontamentos.size()>0){
-            realm.executeTransaction(new Realm.Transaction(){
-                @Override
-                public void execute(Realm realm) {
-                    apontamentos.first().titulo     =   apontamento.titulo    ;
-                    apontamentos.first().descricao  =   apontamento.descricao ;
-                    apontamentos.first().date       =   apontamento.date      ;
-                    apontamentos.first().uriPhoto   =   apontamento.uriPhoto  ;
-                    apontamentos.first().uc         =   apontamento.uc        ;
-                }
-            });
-        }
-    }
-
-    public static void delete(final Apontamento apontamento, Realm realm){
-        final RealmResults<Apontamento> apontamentos = realm.where(Apontamento.class)
-                .equalTo("id", apontamento.id)
-                .findAll();
-        if (apontamentos.size()>0){
-            realm.executeTransaction(new Realm.Transaction(){
-                @Override
-                public void execute(Realm realm) {
-                    apontamentos.first().deleteFromRealm();
-                }
-            });
-        }
-    }
 }

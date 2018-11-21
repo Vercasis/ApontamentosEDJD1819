@@ -26,32 +26,25 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmResults;
+import java.util.ArrayList;
+import java.util.List;
+
 import ipca.edjd.apontamentos.models.Apontamento;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "apontamentos";
     ListView listView;
-    RealmResults<Apontamento> apontamentos;
+
     ApontamentosAdapter adapter;
-    Realm realm;
+
+    List <Apontamento> apontamentos = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Realm.init(this);
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
 
-        realm = Realm.getDefaultInstance();
-
-        apontamentos = realm.where(Apontamento.class)
-                .findAll();
 
 
 
@@ -90,12 +83,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
 
-        apontamentos = realm.where(Apontamento.class)
-                .findAll();
-
-        for (Apontamento a : apontamentos) {
-            Log.d("apontamentos_AA", a.getTitulo());
-        }
 
         adapter.notifyDataSetChanged();
     }
