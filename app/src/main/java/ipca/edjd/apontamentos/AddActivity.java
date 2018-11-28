@@ -95,7 +95,7 @@ public class AddActivity extends AppCompatActivity {
 
             //Apontamento.add(apontamento, Realm.getDefaultInstance());
 
-// Write a message to the database
+            // Write a message to the database
 
 
             myRef.child(apontamento.getId()).setValue(apontamento);
