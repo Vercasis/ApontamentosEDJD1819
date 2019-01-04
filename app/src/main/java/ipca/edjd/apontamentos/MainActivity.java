@@ -5,10 +5,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.BaseBundle;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -25,6 +27,22 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,15 +91,55 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        FirebaseMessaging.getInstance().subscribeToTopic("general")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = "subscrived general";
+                        if (!task.isSuccessful()) {
+                            msg = "faled to subscrive general";
+                        }
+                        Log.d(TAG, msg);
+                    }
+                });
+
     }
+
+    FirebaseDatabase database;
+    DatabaseReference myRef;
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference(currentUser.getUid()).child("Apontamentos");
 
 
-        adapter.notifyDataSetChanged();
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                apontamentos.clear();
+
+                for (DataSnapshot d: dataSnapshot.getChildren()){
+                    Apontamento apontamento = d.getValue(Apontamento.class);
+                    apontamentos.add(apontamento);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
+
+
     }
 
     @Override
@@ -107,6 +165,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class ApontamentosAdapter extends BaseAdapter {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("images");
+
 
         @Override
         public int getCount() {
@@ -130,16 +191,43 @@ public class MainActivity extends AppCompatActivity {
 
             TextView textViewDescription = convertView.findViewById(R.id.textViewDescription);
             TextView textViewUCName = convertView.findViewById(R.id.textViewNomeUC);
-            ImageView imageView = convertView.findViewById(R.id.imageViewApontamento);
+            final ImageView imageView = convertView.findViewById(R.id.imageViewApontamento);
 
             textViewDescription.setText(apontamentos.get(position).getTitulo());
             textViewUCName.setText(apontamentos.get(position).getUc().getNome());
 
+            if (apontamentos.get(position).getUriPhoto() != null
+                    && apontamentos.get(position).getUriPhoto().length()>0){
+                StorageReference mountainsRef = storageRef.child(
+                        apontamentos.get(position).getUriPhoto());
+            /*
             String path = apontamentos.get(position).getUriPhoto();
             if (path != null){
                 Bitmap bm = Utils.loadBitmap(path);
                 imageView.setImageBitmap(bm);
+            }*/
+
+
+                final long ONE_MEGABYTE = 1024 * 1024;
+                mountainsRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+
+                        imageView.setImageBitmap(bitmap);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle any errors
+                    }
+                });
             }
+
+
 
             return convertView;
         }

@@ -3,6 +3,7 @@ package ipca.edjd.apontamentos;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -20,8 +23,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import java.util.UUID;
+
 import ipca.edjd.apontamentos.models.Apontamento;
 
 public class AddActivity extends AppCompatActivity {
@@ -33,6 +42,7 @@ public class AddActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    FirebaseStorage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +54,7 @@ public class AddActivity extends AppCompatActivity {
         imageViewPhoto = findViewById(R.id.imagePhoto);
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-
+        storage = FirebaseStorage.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference(currentUser.getUid()).child("Apontamentos");
@@ -79,28 +89,39 @@ public class AddActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_save) {
 
-            Apontamento apontamento = new Apontamento();
-            apontamento.setDate(new Date());
 
             if (bm!=null){
-                String path =Utils.saveBitmap(bm);
-                if (path !=null) {
-                    apontamento.setUriPhoto(path);
-                }
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+                final String fileName = UUID.randomUUID().toString()+".jpg";
+                StorageReference storageRef = storage.getReference().child("images");
+                StorageReference mountainsRef = storageRef.child(fileName);
+
+                UploadTask uploadTask = mountainsRef.putBytes(data);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        Apontamento apontamento = new Apontamento();
+                        apontamento.setDate(new Date());
+
+                        apontamento.setTitulo(editTextTitle.getText().toString());
+                        apontamento.setDescricao(editTextDiscription.getText().toString());
+                        apontamento.setUriPhoto(fileName);
+                        myRef.child(apontamento.getId()).setValue(apontamento);
+
+                        finish();
+                    }
+                });
             }
 
-            apontamento.setTitulo(editTextTitle.getText().toString());
-            apontamento.setDescricao(editTextDiscription.getText().toString());
 
-
-            //Apontamento.add(apontamento, Realm.getDefaultInstance());
-
-            // Write a message to the database
-
-
-            myRef.child(apontamento.getId()).setValue(apontamento);
-
-            finish();
 
             return true;
         }

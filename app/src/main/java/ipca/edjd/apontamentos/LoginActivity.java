@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                 String password = mPasswordView.getText().toString();
 
                 FirebaseUser currentUser = mAuth.getCurrentUser();
-                if (currentUser == null){
+                if (false){
                 //create new user
                 mAuth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
